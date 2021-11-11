@@ -9,4 +9,4 @@ Satwik Narayan Bhagwat PES1UG19CS438
 Shreevathsa B K PES1UG19CS461
 
 
-YAH is meant to be a mini-HDFS setup on your system, complete with the architectural structure consisting of Data Nodes and Name Nodes and replication of data across nodes.
+
