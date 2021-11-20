@@ -6,7 +6,10 @@ def init_DFS(config_file_path = 'default_config.json'):
 	config = json.load(config_file)
 	print(json.dumps(config, indent=4))
 
-	parent_path = '/home/pes1ug19cs438/Desktop/BD_assignments/Project/hadoop2021_bigdata-main/'
+	USER = os.path.expanduser('~')
+	parent_path = f'{USER}/DATANODE/'
+	print(parent_path)
+	os.mkdir(parent_path)
 	directory = 'DataNodes'
 	cur_path = os.path.join(parent_path, directory)
 	os.mkdir(cur_path)
