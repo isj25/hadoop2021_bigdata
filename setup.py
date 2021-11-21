@@ -8,6 +8,9 @@ def init_DFS(config_file_path = 'default_config.json'):
 	datanode = os.path.expandvars(config['path_to_datanodes'])
 	namenode = os.path.expandvars(config['path_to_namenodes'])
 	
+	DFS = os.path.expandvars(config['fs_path']) # FS PATH
+	os.makedirs(DFS)  #root
+	
 	os.mkdir(datanode)
 	os.mkdir(namenode)
 	
