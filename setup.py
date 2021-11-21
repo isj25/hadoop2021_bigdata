@@ -7,7 +7,7 @@ def init_DFS(config_file_path = 'default_config.json'):
 
 	datanode = os.path.expandvars(config['path_to_datanodes'])
 	namenode = os.path.expandvars(config['path_to_namenodes'])
-	
+
 	DFS = os.path.expandvars(config['fs_path']) # FS PATH
 	os.makedirs(DFS)  #root
 	
@@ -23,5 +23,9 @@ def init_DFS(config_file_path = 'default_config.json'):
 		dirname = 'DN' + str(i+1)
 		path = os.path.join(cur_path, dirname)
 		os.mkdir(path)
+
+	dfs_setup = open("dfs_setup_config.json",'w')
+	dfs_setup.write(json.dumps(config,indent=4))
+	dfs_setup.close()
 
 init_DFS('config_sample.json')
