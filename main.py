@@ -1,4 +1,5 @@
 import argparse
+from commands import *
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Command line interface for YAH')
@@ -10,7 +11,9 @@ if __name__ == '__main__':
 	command = args.command
 
 	if command == 'put':
-		pass
+		source = args.arg1
+		destination = args.arg2
+		put_command(source,destination)
 	elif command == 'cat':
 		pass
 	elif command == 'ls':
