@@ -1,13 +1,11 @@
-from fsplit.filesplit import Filesplit
-import json
-fs = Filesplit()
+import os.path
+from math import ceil
 
-# def split_cb(f, s):
-#     print("file: {0}, size: {1}".format(f, s))
-config_file =open("config_sample.json",)
-file_data = json.load(config_file)
+def fileSplit(path, splitSize):
+	file = open(path, 'r')
+	size = os.path.getsize(path)
 
-size = file_data['block_size']
-size = size * 1000000
-print(size)
-fs.split(file="/home/pes1ug19cs191/Desktop/100MB.bin", split_size=size, output_dir="/home/pes1ug19cs191/Desktop/test")
+	blocks = ceil(size / splitSize)
+
+	for _ in range(blocks):
+		yield file.read(splitSize)
