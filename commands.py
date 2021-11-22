@@ -11,6 +11,7 @@ datanode_path = datanode+'DataNodes/'
 
 no_of_nodes = config['num_datanodes']
 replication = config['replication_factor']
+fs_path = os.path.expandvars(config['fs_path'])
 
 def put_command(source, destination):
 	block_size = config["block_size"]
@@ -21,6 +22,7 @@ def put_command(source, destination):
 	mapping_data = json.load(mapping_file)
 
 	if not destination in mapping_data:
+		mapping_file.close()
 		raise Exception(destination,"No such directory")
 	mapping_data[destination].append(user_file)
 	mapping_file.seek(0)
@@ -63,8 +65,22 @@ def put_command(source, destination):
 def cat_command():
 	pass
 
-def ls_command():
-	pass
+def ls_command(path):
+	mapping_file = open(namenode+"mapping_file.json",'r')
+	mapping_data = json.load(mapping_file)
+	
+	#directory doesn't exist
+	if not path in mapping_data:
+		mapping_file.close()
+		raise Exception(path,"No such directory")
+	for entry in mapping_data[path]:
+		if (path+'/'+entry) in mapping_data:
+			print(entry, "\tDirectory")
+		else:
+			print(entry, "\tfile")
+	mapping_file.close()
+
+
 
 def rmdir_command(path):
 	path_list = path.split('/')
