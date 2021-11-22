@@ -66,8 +66,34 @@ def cat_command():
 def ls_command():
 	pass
 
-def rmdir_command():
-	pass
+def rmdir_command(path):
+	path_list = path.split('/')
+	user_dir = path_list.pop()
+	par_path = '/'.join(path_list)
+
+	mapping_file = open(namenode+"mapping_file.json",'r+')
+	mapping_data = json.load(mapping_file)
+	
+	#directory doesn't exist
+	if not path in mapping_data:
+		mapping_file.close()
+		raise Exception(path,"No such directory")
+
+	if len(mapping_data[path]) != 0:
+		mapping_file.close()
+		raise Exception(path,"Directory is not empty")
+
+	del mapping_data[path]
+	
+	#deleting entry in parent directory
+	if par_path in mapping_data:
+		mapping_data[par_path].remove(user_dir)
+
+	mapping_file.truncate(0)
+	mapping_file.seek(0)
+	json.dump(mapping_data,mapping_file,indent=4)
+	mapping_file.close()
+
 
 def mkdir_command(path):
 	path_list = path.split('/')
