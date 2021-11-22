@@ -17,10 +17,13 @@ if __name__ == '__main__':
 	elif command == 'cat':
 		pass
 	elif command == 'ls':
-		pass
+		path = args.arg1
+		ls_command(path)
 	elif command == 'rm':
 		pass
 	elif command == 'mkdir':
-		pass
+		path = args.arg1
+		mkdir_command(path)
 	elif command == 'rmdir':
-		pass
+		path = args.arg1
+		rmdir_command(path)
