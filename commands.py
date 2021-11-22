@@ -8,8 +8,10 @@ config = json.load(config_file)
 datanode = os.path.expandvars(config['path_to_datanodes'])
 namenode = os.path.expandvars(config['path_to_namenodes'])
 datanode_path = datanode+'DataNodes/'
-no_of_nodes = config['num_datanodes']
 
+no_of_nodes = config['num_datanodes']
+replication = config['replication_factor']
+    
 def put_command(source, destination):
 	block_size = config["block_size"]
 	user_file = source.split('/')[-1]
@@ -37,14 +39,22 @@ def put_command(source, destination):
 	#splitting files to datanodes
 	i = 0
 	for split in fileSplit(source,block_size):
-		cur_hash = str((i % no_of_nodes) + 1)
-		block = 'block' + str(i+1)
-		store_path = 'DN' + cur_hash + '/' + block
-		location_data[user_file].append(store_path)
-		file_path = datanode_path + store_path
-		file = open(file_path,'w')
-		file.write(split)
-		file.close()
+		cur_hash = (i % no_of_nodes) + 1
+		replica = []
+		r = 0
+		#create replication_factor number of replicas
+		for j in range(cur_hash, cur_hash + replication):
+			block = user_file + '_block' + str(i) + '_r' + str(r)
+			store_path = 'DN' + str((j % no_of_nodes) + 1) + '/' + block
+			replica.append(store_path)
+
+			file_path = datanode_path + store_path
+			file = open(file_path,'w')
+			file.write(split)
+			file.close()
+			r = r + 1
+
+		location_data[user_file].append(replica)
 		i = i + 1
 
 	location_file.seek(0)
