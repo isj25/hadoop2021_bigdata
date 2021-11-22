@@ -11,31 +11,30 @@ datanode_path = datanode+'DataNodes/'
 
 no_of_nodes = config['num_datanodes']
 replication = config['replication_factor']
-    
+
 def put_command(source, destination):
 	block_size = config["block_size"]
 	user_file = source.split('/')[-1]
 
 	#mapping fs_path files
-	mapping_file = open(namenode+"mapping_file.json",'w+')
-	try:
-		mapping_data = json.load(mapping_file)
-	except Exception as e:
-		mapping_data = {}
-	mapping_data[destination] = user_file
+	mapping_file = open(namenode+"mapping_file.json",'r+')
+	mapping_data = json.load(mapping_file)
+
+	if not destination in mapping_data:
+		raise Exception(destination,"No such directory")
+	mapping_data[destination].append(user_file)
 	mapping_file.seek(0)
 	json.dump(mapping_data,mapping_file,indent=4)
 	mapping_file.close()
 
 	#file to keep track of where file blocks are stored
-	location_file = open(namenode+"location_file.json","w+")
+	location_file = open(namenode+"location_file.json","r+")
 	try:
 		location_data = json.load(location_file)
 	except Exception as e:
 		location_data = {}
 	location_data[user_file] = []
 	
-
 	#splitting files to datanodes
 	i = 0
 	for split in fileSplit(source,block_size):
@@ -61,7 +60,6 @@ def put_command(source, destination):
 	json.dump(location_data,location_file,indent=4)
 	location_file.close()
 
-
 def cat_command():
 	pass
 
@@ -71,8 +69,24 @@ def ls_command():
 def rmdir_command():
 	pass
 
-def mkdir_command():
-	pass
+def mkdir_command(path):
+	path_list = path.split('/')
+	user_dir = path_list.pop()
+	par_path = '/'.join(path_list)
+	mapping_file = open(namenode+"mapping_file.json",'r+')
+	mapping_data = json.load(mapping_file)
+	
+	#have to create parent directory before creating subdirectory
+	if not par_path in mapping_data:
+		mapping_file.close()
+		raise Exception(par_path,"No such directory")
+
+	#appends subdirectory to parent directory
+	mapping_data[par_path].append(user_dir)
+	mapping_data[path] = []
+	mapping_file.seek(0)
+	json.dump(mapping_data,mapping_file,indent=4)
+	mapping_file.close()
 
 def rm_command():
 	pass
