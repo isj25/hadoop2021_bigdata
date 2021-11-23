@@ -5,73 +5,77 @@ from filesplit import *
 config_file = open('dfs_setup_config.json','r')
 config = json.load(config_file)
 
-datanode = os.path.expandvars(config['path_to_datanodes'])
-namenode = os.path.expandvars(config['path_to_namenodes'])
-datanode_path = datanode+'DataNodes/'
-
 no_of_nodes = config['num_datanodes']
 replication = config['replication_factor']
+block_size = config['block_size']
+
+datanode = os.path.expandvars(config['path_to_datanodes'])
+namenode = os.path.expandvars(config['path_to_namenodes'])
 fs_path = os.path.expandvars(config['fs_path'])
 
+datanode_path = os.path.join(datanode, 'DataNodes')
+
+datanode_tracker = open(namenode + 'datanode_tracker.json', 'r+')
+datanode_details = json.load(datanode_tracker)
+
+
 def put_command(source, destination):
-	block_size = config["block_size"]
 	user_file = source.split('/')[-1]
 
-	#mapping fs_path files
-	mapping_file = open(namenode+"mapping_file.json",'r+')
+	#mapping of virtual path and file name
+	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 
 	if not destination in mapping_data:
 		mapping_file.close()
 		raise Exception(destination,"No such directory")
+
 	mapping_data[destination].append(user_file)
 	mapping_file.seek(0)
 	json.dump(mapping_data,mapping_file,indent=4)
 	mapping_file.close()
 
 	#file to keep track of where file blocks are stored
-	location_file = open(namenode+"location_file.json","r+")
+	location_file = open(namenode + "location_file.json","r+")
 	try:
 		location_data = json.load(location_file)
 	except Exception as e:
 		location_data = {}
 	location_data[user_file] = []
+
 	
 	#splitting files to datanodes
-	i = 0
+	next_datanode = datanode_details['Next_datanode']
 	for split in fileSplit(source,block_size):
-		cur_hash = (i % no_of_nodes) + 1
 		replica = []
-		r = 0
-		#create replication_factor number of replicas
-		for j in range(cur_hash, cur_hash + replication):
-			block = user_file + '_block' + str(i) + '_r' + str(r)
-			store_path = 'DN' + str((j % no_of_nodes) + 1) + '/' + block
+		for _ in range(replication):
+			block = 'block' + str(datanode_details['DN' + str(next_datanode)][1])
+			store_path = 'DN' + str(next_datanode) + '/' + block
 			replica.append(store_path)
 
-			file_path = datanode_path + store_path
+			datanode_details['DN' + str(next_datanode)][1] += 1
+			next_datanode = (next_datanode % no_of_nodes) + 1
+
+			file_path = os.path.join(datanode_path, store_path)
 			file = open(file_path,'w')
 			file.write(split)
 			file.close()
-			r = r + 1
 
 		location_data[user_file].append(replica)
-		i = i + 1
+
+	datanode_details['Next_datanode'] = next_datanode
+
+	datanode_tracker.seek(0)
+	json.dump(datanode_details, datanode_tracker, indent=4)
+	datanode_tracker.close()
 
 	location_file.seek(0)
 	json.dump(location_data,location_file,indent=4)
 	location_file.close()
 
-def cat_command():
-	loc_file = namenode+"/location_file.json"
-	file = json.load(loc_file)
-	pairs = file.items()
 
-	for key,value in pairs:
-		for p in value:
-			path = datanode + "DataNodes/"  + p[0]			#need to handle line break and make all given address readable
-			f = open(path,'r')
-			print(f.read())
+def cat_command():
+	pass
 
 
 def ls_command(path):
@@ -88,7 +92,6 @@ def ls_command(path):
 		else:
 			print(entry, "\tfile")
 	mapping_file.close()
-
 
 
 def rmdir_command(path):
@@ -124,7 +127,7 @@ def mkdir_command(path):
 	path_list = path.split('/')
 	user_dir = path_list.pop()
 	par_path = '/'.join(path_list)
-	mapping_file = open(namenode+"mapping_file.json",'r+')
+	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 	
 	#have to create parent directory before creating subdirectory
@@ -138,6 +141,7 @@ def mkdir_command(path):
 	mapping_file.seek(0)
 	json.dump(mapping_data,mapping_file,indent=4)
 	mapping_file.close()
+
 
 def rm_command():
 	pass
