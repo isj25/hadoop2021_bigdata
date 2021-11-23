@@ -63,7 +63,16 @@ def put_command(source, destination):
 	location_file.close()
 
 def cat_command():
-	pass
+	loc_file = namenode+"/location_file.json"
+	file = json.load(loc_file)
+	pairs = file.items()
+
+	for key,value in pairs:
+		for p in value:
+			path = datanode + "DataNodes/"  + p[0]			#need to handle line break and make all given address readable
+			f = open(path,'r')
+			print(f.read())
+
 
 def ls_command(path):
 	mapping_file = open(namenode+"mapping_file.json",'r')
