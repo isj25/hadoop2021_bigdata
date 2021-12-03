@@ -21,6 +21,7 @@ datanode_details = json.load(datanode_tracker)
 
 def put_command(source, destination):
 	user_file = source.split('/')[-1]
+	dest_path = os.path.join(destination, user_file)
 
 	#mapping of virtual path and file name
 	mapping_file = open(namenode + "mapping_file.json",'r+')
@@ -41,27 +42,31 @@ def put_command(source, destination):
 		location_data = json.load(location_file)
 	except Exception as e:
 		location_data = {}
-	location_data[user_file] = []
+	location_data[dest_path] = []
 
-	
 	#splitting files to datanodes
 	next_datanode = datanode_details['Next_datanode']
 	for split in fileSplit(source,block_size):
 		replica = []
 		for _ in range(replication):
-			block = 'block' + str(datanode_details['DN' + str(next_datanode)][1])
-			store_path = 'DN' + str(next_datanode) + '/' + block
-			replica.append(store_path)
-
-			datanode_details['DN' + str(next_datanode)][1] += 1
+			DN_str = 'DN' + str(next_datanode)
+			blk_no = datanode_details[DN_str][1]
+			block = 'block' + str(blk_no)
+			
+			datanode_details[DN_str][1] += 1
+			datanode_details[DN_str][0][blk_no - 1] = 1
 			next_datanode = (next_datanode % no_of_nodes) + 1
+
+			store_path = DN_str + '/' + block
+			replica.append(store_path)
 
 			file_path = os.path.join(datanode_path, store_path)
 			file = open(file_path,'w')
 			file.write(split)
 			file.close()
 
-		location_data[user_file].append(replica)
+		location_data[dest_path].append(replica)
+
 
 	datanode_details['Next_datanode'] = next_datanode
 
@@ -70,7 +75,7 @@ def put_command(source, destination):
 	datanode_tracker.close()
 
 	location_file.seek(0)
-	json.dump(location_data,location_file,indent=4)
+	json.dump(location_data,location_file, indent=4)
 	location_file.close()
 
 
@@ -79,27 +84,28 @@ def cat_command():
 
 
 def ls_command(path):
-	mapping_file = open(namenode+"mapping_file.json",'r')
+	mapping_file = open(namenode + "mapping_file.json",'r')
 	mapping_data = json.load(mapping_file)
 	
 	#directory doesn't exist
 	if not path in mapping_data:
 		mapping_file.close()
 		raise Exception(path,"No such directory")
+
 	for entry in mapping_data[path]:
-		if (path+'/'+entry) in mapping_data:
+		if (path + entry) in mapping_data:
 			print(entry, "\tDirectory")
 		else:
 			print(entry, "\tfile")
+
 	mapping_file.close()
 
 
 def rmdir_command(path):
-	path_list = path.split('/')
-	user_dir = path_list.pop()
-	par_path = '/'.join(path_list)
+	split = os.path.split(path)
+	par_path, user_dir = split[0], split[1]
 
-	mapping_file = open(namenode+"mapping_file.json",'r+')
+	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 	
 	#directory doesn't exist
@@ -124,9 +130,9 @@ def rmdir_command(path):
 
 
 def mkdir_command(path):
-	path_list = path.split('/')
-	user_dir = path_list.pop()
-	par_path = '/'.join(path_list)
+	split = os.path.split(path)
+	par_path, user_dir = split[0], split[1]
+
 	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 	
@@ -138,6 +144,7 @@ def mkdir_command(path):
 	#appends subdirectory to parent directory
 	mapping_data[par_path].append(user_dir)
 	mapping_data[path] = []
+
 	mapping_file.seek(0)
 	json.dump(mapping_data,mapping_file,indent=4)
 	mapping_file.close()
