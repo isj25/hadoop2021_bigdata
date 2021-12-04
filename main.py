@@ -15,12 +15,14 @@ if __name__ == '__main__':
 		destination = args.arg2
 		put_command(source,destination)
 	elif command == 'cat':
-		pass
+		path = args.arg1
+		cat_command(path)
 	elif command == 'ls':
 		path = args.arg1
 		ls_command(path)
 	elif command == 'rm':
-		pass
+		path = args.arg1
+		rm_command(path)
 	elif command == 'mkdir':
 		path = args.arg1
 		mkdir_command(path)
