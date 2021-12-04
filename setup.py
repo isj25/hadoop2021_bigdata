@@ -32,10 +32,8 @@ def init_DFS(config_file_path = 'default_config.json'):
 		dirname = 'DN' + str(i+1)
 		path = os.path.join(cur_path, dirname)
 		os.mkdir(path)
-
-		datanode_data[dirname] = []
-		datanode_data[dirname].append(blocks)
-		datanode_data[dirname].append(1)
+		
+		datanode_data[dirname] = blocks
 
 	datanode_tracker.write(json.dumps(datanode_data, indent=4))
 	mapping_file.write(json.dumps({'/' : []}, indent=4))
