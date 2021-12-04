@@ -1,6 +1,6 @@
 import os
 import json
-from filesplit import *
+from utilities import *
 
 config_file = open('dfs_setup_config.json','r')
 config = json.load(config_file)
@@ -14,9 +14,6 @@ namenode = os.path.expandvars(config['path_to_namenodes'])
 fs_path = os.path.expandvars(config['fs_path'])
 
 datanode_path = os.path.join(datanode, 'DataNodes')
-
-datanode_tracker = open(namenode + 'datanode_tracker.json', 'r+')
-datanode_details = json.load(datanode_tracker)
 
 
 def put_command(source, destination):
@@ -32,17 +29,15 @@ def put_command(source, destination):
 		raise Exception(destination,"No such directory")
 
 	mapping_data[destination].append(user_file)
-	mapping_file.seek(0)
-	json.dump(mapping_data,mapping_file,indent=4)
-	mapping_file.close()
+	updateJSON(mapping_data ,mapping_file)
 
 	#file to keep track of where file blocks are stored
 	location_file = open(namenode + "location_file.json","r+")
-	try:
-		location_data = json.load(location_file)
-	except Exception as e:
-		location_data = {}
+	location_data = json.load(location_file)
 	location_data[dest_path] = []
+
+	datanode_tracker = open(namenode + 'datanode_tracker.json', 'r+')
+	datanode_details = json.load(datanode_tracker)
 
 	#splitting files to datanodes
 	next_datanode = datanode_details['Next_datanode']
@@ -50,11 +45,10 @@ def put_command(source, destination):
 		replica = []
 		for _ in range(replication):
 			DN_str = 'DN' + str(next_datanode)
-			blk_no = datanode_details[DN_str][1]
+			blk_no = datanode_details[DN_str].index(0)
 			block = 'block' + str(blk_no)
 			
-			datanode_details[DN_str][1] += 1
-			datanode_details[DN_str][0][blk_no - 1] = 1
+			datanode_details[DN_str][blk_no] = 1
 			next_datanode = (next_datanode % no_of_nodes) + 1
 
 			store_path = DN_str + '/' + block
@@ -70,18 +64,26 @@ def put_command(source, destination):
 
 	datanode_details['Next_datanode'] = next_datanode
 
-	datanode_tracker.seek(0)
-	json.dump(datanode_details, datanode_tracker, indent=4)
-	datanode_tracker.close()
-
-	location_file.seek(0)
-	json.dump(location_data,location_file, indent=4)
-	location_file.close()
+	updateJSON(datanode_details, datanode_tracker)
+	updateJSON(location_data, location_file)
 
 
-def cat_command():
-	pass
+def cat_command(path):
+	location_file = open(namenode + "location_file.json",'r+')
+	location_data = json.load(location_file)
 
+	if not path in location_data:
+		location_file.close()
+		raise Exception(path, "File does not exist")
+
+	for replica in location_data[path]:
+		for file_blk in replica:
+			block_path = os.path.join(datanode, 'DataNodes', file_blk)
+			if os.path.isfile(block_path):
+				content = open(block_path, 'r').read()
+				print(content, end='')
+				break
+	
 
 def ls_command(path):
 	mapping_file = open(namenode + "mapping_file.json",'r')
@@ -123,10 +125,8 @@ def rmdir_command(path):
 	if par_path in mapping_data:
 		mapping_data[par_path].remove(user_dir)
 
-	mapping_file.truncate(0)
-	mapping_file.seek(0)
-	json.dump(mapping_data,mapping_file,indent=4)
-	mapping_file.close()
+
+	updateJSON(mapping_data, mapping_file)
 
 
 def mkdir_command(path):
@@ -145,10 +145,40 @@ def mkdir_command(path):
 	mapping_data[par_path].append(user_dir)
 	mapping_data[path] = []
 
-	mapping_file.seek(0)
-	json.dump(mapping_data,mapping_file,indent=4)
-	mapping_file.close()
+	updateJSON(mapping_data, mapping_file)
+	
+
+def rm_command(path):
+	split = os.path.split(path)
+	par_path, file = split[0], split[1]
+
+	location_file = open(namenode + "location_file.json",'r+')
+	location_data = json.load(location_file)
+
+	if not path in location_data:
+		location_file.close()
+		raise Exception(path, "File does not exist")
 
 
-def rm_command():
-	pass
+	datanode_tracker = open(namenode + 'datanode_tracker.json', 'r+')
+	datanode_details = json.load(datanode_tracker)
+
+	for replica in location_data[path]:
+		for file_blk in replica:
+			DN_str, block = file_blk.split('/')
+			block = int(block[5:])
+
+			datanode_details[DN_str][block] = 0
+
+			block_path = os.path.join(datanode, 'DataNodes', file_blk)
+			os.remove(block_path)
+
+	del location_data[path]
+
+	mapping_file = open(namenode + "mapping_file.json",'r+')
+	mapping_data = json.load(mapping_file)
+	mapping_data[par_path].remove(file)
+
+	updateJSON(mapping_data, mapping_file)
+	updateJSON(location_data, location_file)
+	updateJSON(datanode_details, datanode_tracker)
