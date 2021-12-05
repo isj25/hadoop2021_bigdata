@@ -1,6 +1,7 @@
 import os
 import json
 from utilities import *
+#from termcolor import colored
 
 config_file = open('dfs_setup_config.json','r')
 config = json.load(config_file)
@@ -24,7 +25,7 @@ def put_command(source, destination):
 	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 
-	if not destination in mapping_data:
+	if not destination in mapping_data:       					#check if destinataion path exists
 		mapping_file.close()
 		raise Exception(destination,"No such directory")
 
@@ -45,10 +46,10 @@ def put_command(source, destination):
 		replica = []
 		for _ in range(replication):
 			DN_str = 'DN' + str(next_datanode)
-			blk_no = datanode_details[DN_str].index(0)
-			block = 'block' + str(blk_no)
+			empty_blk_no = datanode_details[DN_str].index(0)
+			block = 'block' + str(empty_blk_no)
 			
-			datanode_details[DN_str][blk_no] = 1
+			datanode_details[DN_str][empty_blk_no] = 1
 			next_datanode = (next_datanode % no_of_nodes) + 1
 
 			store_path = DN_str + '/' + block
@@ -97,6 +98,7 @@ def ls_command(path):
 	for entry in mapping_data[path]:
 		if (path + entry) in mapping_data:
 			print(entry, "\tDirectory")
+			#print(colored(entry,'blue'))
 		else:
 			print(entry, "\tfile")
 
@@ -115,7 +117,7 @@ def rmdir_command(path):
 		mapping_file.close()
 		raise Exception(path,"No such directory")
 
-	if len(mapping_data[path]) != 0:
+	if len(mapping_data[path]) != 0:								#check for any file/dir in path
 		mapping_file.close()
 		raise Exception(path,"Directory is not empty")
 
@@ -166,7 +168,7 @@ def rm_command(path):
 	for replica in location_data[path]:
 		for file_blk in replica:
 			DN_str, block = file_blk.split('/')
-			block = int(block[5:])
+			block = int(block[5:])									#getting the block number
 
 			datanode_details[DN_str][block] = 0
 

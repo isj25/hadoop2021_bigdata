@@ -20,8 +20,8 @@ def init_DFS(config_file_path = 'default_config.json'):
 	datanode_data = {}
 	datanode_data['Next_datanode'] = 1
 
-	datanode_size = config['datanode_size']
-	blocks = [0 for _ in range(datanode_size)]
+	datanode_size = config['datanode_size']						
+	blocks = [0 for _ in range(datanode_size)]				#empty blocks
 
 	directory = 'DataNodes'
 	cur_path = os.path.join(datanode, directory)
