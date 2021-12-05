@@ -1,4 +1,5 @@
-import os.path
+
+import os
 import json
 from math import ceil
 

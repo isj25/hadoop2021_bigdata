@@ -1,3 +1,4 @@
+import datetime
 import os
 import json
 from utilities import *
@@ -14,6 +15,9 @@ datanode = os.path.expandvars(config['path_to_datanodes'])
 namenode = os.path.expandvars(config['path_to_namenodes'])
 fs_path = os.path.expandvars(config['fs_path'])
 
+name_node_logfile_path = os.path.expandvars(config['namenode_log_path'])
+namenode_log_file = open(name_node_logfile_path,'a+')
+
 datanode_path = os.path.join(datanode, 'DataNodes')
 
 
@@ -27,10 +31,12 @@ def put_command(source, destination):
 
 	if not destination in mapping_data:       					#check if destinataion path exists
 		mapping_file.close()
+		namenode_log_file.write(str(datetime.datetime.now()) + "path error " + destination +" does not exist\n")
 		raise Exception(destination,"No such directory")
 
 	mapping_data[destination].append(user_file)
 	updateJSON(mapping_data ,mapping_file)
+	namenode_log_file.write(str(datetime.datetime.now()) + " : mapping file updated "+str(os.path.getsize(namenode+"mapping_file.json")) +" bytes"+"\n")
 
 	#file to keep track of where file blocks are stored
 	location_file = open(namenode + "location_file.json","r+")
@@ -62,12 +68,13 @@ def put_command(source, destination):
 
 		location_data[dest_path].append(replica)
 
-
+	namenode_log_file.write(str(datetime.datetime.now()) + " : A new file is added ->" + user_file +"\n")
 	datanode_details['Next_datanode'] = next_datanode
 
 	updateJSON(datanode_details, datanode_tracker)
+	namenode_log_file.write(str(datetime.datetime.now()) + " : datanode_tracker file updated "+ str(os.path.getsize(namenode + "datanode_tracker.json"))+" bytes"+"\n")
 	updateJSON(location_data, location_file)
-
+	namenode_log_file.write(str(datetime.datetime.now()) + " : location file updated "+ str(os.path.getsize(namenode + "location_file.json"))+" bytes"+"\n")
 
 def cat_command(path):
 	location_file = open(namenode + "location_file.json",'r+')
@@ -84,7 +91,7 @@ def cat_command(path):
 				content = open(block_path, 'r').read()
 				print(content, end='')
 				break
-	
+
 
 def ls_command(path):
 	mapping_file = open(namenode + "mapping_file.json",'r')
@@ -176,6 +183,7 @@ def rm_command(path):
 			os.remove(block_path)
 
 	del location_data[path]
+	namenode_log_file.write(str(datetime.datetime.now()) + " : file is removed " + file +"\n")
 
 	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
