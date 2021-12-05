@@ -14,6 +14,7 @@ def fileSplit(path, splitSize):
 		yield file.read(splitSize)
 
 
+
 def updateJSON(data, file):
 	file.seek(0)
 	file.truncate(0)
