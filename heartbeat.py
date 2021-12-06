@@ -1,10 +1,8 @@
-from posix import listdir
 import time
 import shutil
 import os
 import json
 from utilities import *
-#from termcolor import colored
 
 config_file = open('current_config.json','r')
 config = json.load(config_file)
@@ -18,32 +16,15 @@ sync_period = config['sync_period']
 num_datanodes = config['num_datanodes']
 
 
-
-
-# def namenodeheart(heartbeat,DN_str):
-#     if(heartbeat == 1):
-#         raise Exception(DN_str,"Datanode is full")
-#     else:
-#         print("no error")
-
-# def datanodeheart():
-#     for d_num in range(1,no_of_nodes+1):
-#         DN_str = "DataNodes/DN"+ str(d_num)
-#         dnode = os.path.join(datanodes,DN_str)
-#         items = os.listdir(dnode)
-#         #print(items)
-#         if(len(items)==datanode_size):
-#             # 0 for available
-#             # 1 for full
-#             heartbeat = 1
-#             namenodeheart(heartbeat,DN_str)
-#         else:
-#             heartbeat = 0
-#             namenodeheart(heartbeat,DN_str)
-
 def namenode_heartbeat():
-    location_file = open(namenode+'location_file.json','r')
-    location_data = json.load(location_file)
+    while(True):
+        #to check for namenode failure
+        try:
+            location_file = open(namenode+'location_file.json','r')
+            location_data = json.load(location_file)
+            break
+        except:
+            pass
     #handle datanode failure
     for dir_no in range(1,num_datanodes+1):
         if not os.path.isdir(datanode+"DataNodes/DN"+str(dir_no)):
