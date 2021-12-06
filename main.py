@@ -1,5 +1,6 @@
 import argparse
 from commands import *
+from shutil import copytree
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Command line interface for YAH')
@@ -11,8 +12,6 @@ if __name__ == '__main__':
 	parser.add_argument('--config')
 	parser.add_argument('--mapper')
 	parser.add_argument('--reducer')
-
-
 
 	args = parser.parse_args()
 	command = args.command
@@ -43,3 +42,5 @@ if __name__ == '__main__':
 		abs_mapper = args.mapper
 		abs_reducer = args.reducer
 		mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer)
+		
+	copytree(namenode_path, secondary_namenode_path, dirs_exist_ok=True)
