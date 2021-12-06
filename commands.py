@@ -15,6 +15,7 @@ block_size = config['block_size']
 
 datanode = os.path.expandvars(config['path_to_datanodes'])
 namenode = os.path.expandvars(config['path_to_namenodes'])
+secondary_namenode_path = os.path.expandvars(config['secondary_namenode_path'])
 fs_path = os.path.expandvars(config['fs_path'])
 datanode_log_path = os.path.expandvars(config['datanode_log_path'])
 
