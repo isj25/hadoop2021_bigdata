@@ -2,7 +2,6 @@ import os
 import json
 import sys
 from utilities import updateJSON
-import heartbeat
 
 if (len(sys.argv) > 1):
     setup_config_path = sys.argv[1]
