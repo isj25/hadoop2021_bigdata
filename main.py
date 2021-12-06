@@ -43,4 +43,4 @@ if __name__ == '__main__':
 		abs_reducer = args.reducer
 		mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer)
 		
-	copytree(namenode_path, secondary_namenode_path, dirs_exist_ok=True)
+	copytree(namenode, secondary_namenode_path, dirs_exist_ok=True)
