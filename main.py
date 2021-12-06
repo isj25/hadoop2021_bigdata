@@ -3,10 +3,17 @@ from commands import *
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Command line interface for YAH')
-	parser.add_argument('command', choices=['put', 'cat', 'ls', 'rm', 'mkdir', 'rmdir'])
+	parser.add_argument('command', choices=['put', 'cat', 'ls', 'rm', 'mkdir', 'rmdir','mapreduce'])
 	parser.add_argument('--arg1')
 	parser.add_argument('--arg2')
-	
+	parser.add_argument('--input')
+	parser.add_argument('--output')
+	parser.add_argument('--config')
+	parser.add_argument('--mapper')
+	parser.add_argument('--reducer')
+
+
+
 	args = parser.parse_args()
 	command = args.command
 
@@ -29,3 +36,10 @@ if __name__ == '__main__':
 	elif command == 'rmdir':
 		path = args.arg1
 		rmdir_command(path)
+	elif command == 'mapreduce':
+		fs_input = args.input
+		fs_output = args.ouput
+		config_path = args.config
+		abs_mapper = args.mapper
+		abs_reducer = args.reducer
+		mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer)

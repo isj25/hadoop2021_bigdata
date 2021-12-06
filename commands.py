@@ -212,3 +212,7 @@ def rm_command(path):
 	namenode_log_file.write(str(datetime.datetime.now()) + " : location file updated "+ str(os.path.getsize(namenode + "location_file.json"))+" bytes"+"\n")
 	updateJSON(datanode_details, datanode_tracker)
 	namenode_log_file.write(str(datetime.datetime.now()) + " : datanode_tracker file updated "+ str(os.path.getsize(namenode + "datanode_tracker.json"))+" bytes"+"\n")
+
+
+
+#def mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer):
