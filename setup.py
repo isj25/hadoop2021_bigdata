@@ -11,6 +11,7 @@ def init_DFS(config_file_path = 'default_config.json'):
 	namenode = os.path.expandvars(config['path_to_namenodes'])
 	#DFS = os.path.expandvars(config['fs_path']) # FS PATH
 	datanode_logs = os.path.expandvars(config['datanode_log_path'])
+
 	
 	if os.path.isdir(datanode):
 		raise Exception("hdfs already exists")
@@ -23,8 +24,6 @@ def init_DFS(config_file_path = 'default_config.json'):
 	name_node_logfile_path = os.path.expandvars(config['namenode_log_path'])
 	namenode_log_file = open(name_node_logfile_path,'a+')
 	namenode_log_file.write(str(datetime.datetime.now()) + " : created namenode log file\n")
-
-	
 
 	mapping_file = open(namenode + 'mapping_file.json','w')
 	namenode_log_file.write(str(datetime.datetime.now()) + ": created namenode mapping file\n")
@@ -67,16 +66,23 @@ def init_DFS(config_file_path = 'default_config.json'):
 	datanode_tracker.close()
 	mapping_file.close()
 	location_file.close()
+	namenode_log_file.close()
 
 	hdfs_file = open('hdfs.json','r+')
 	hdfs_data = json.load(hdfs_file)
 	hdfs_data["no_of_dfs"] = hdfs_data["no_of_dfs"] + 1
-	dfs_setup = open("dfs_setup_config_"+str(hdfs_data["no_of_dfs"])+".json",'w')
+
+	dfs_setup = open("dfs_setup_config_" + str(hdfs_data["no_of_dfs"])+".json",'w')
 	hdfs_main_path  = os.path.split(os.path.split(datanode)[0])[0]
 	config["secondary_namenode_path"] = hdfs_main_path + "/SECONDARYNAMENODE"
 	config["editlog_path"] = hdfs_main_path + "/EDITLOG"
+
+	os.mkdir(config["secondary_namenode_path"])
+	os.mkdir(config["editlog_path"])
+
 	dfs_setup.write(json.dumps(config,indent=4))
 	dfs_setup.close()
 	updateJSON(hdfs_data,hdfs_file)
-	namenode_log_file.close()
+
+
 init_DFS('config_sample.json')
