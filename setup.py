@@ -21,11 +21,6 @@ def init_DFS(config_file_path = 'default_config.json'):
 	namenode_log_file = open(name_node_logfile_path,'a+')
 	namenode_log_file.write(str(datetime.datetime.now()) + " : created namenode log file\n")
 
-
-
-
-	#datanode log file 
-	
 	
 
 	mapping_file = open(namenode + 'mapping_file.json','w')
@@ -54,7 +49,7 @@ def init_DFS(config_file_path = 'default_config.json'):
 		os.mkdir(path)
 
 		namenode_log_file.write(str(datetime.datetime.now()) + ": created datanode " + dirname +"\n")
-		logpaths = os.path.join(datanode_logs,dirname)
+		logpaths = os.path.join(datanode_logs,dirname)												#create log file for each datanode
 		logpaths = logpaths +".txt"
 		datanode_logfiles = open(logpaths,'a+')
 		datanode_logfiles.write(str(datetime.datetime.now()) + " : created datanode " + dirname + "\n")
