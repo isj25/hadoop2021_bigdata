@@ -9,15 +9,24 @@ def init_DFS(config_file_path = 'default_config.json'):
 	datanode = os.path.expandvars(config['path_to_datanodes'])
 	namenode = os.path.expandvars(config['path_to_namenodes'])
 	DFS = os.path.expandvars(config['fs_path']) # FS PATH
-	
+	datanode_logs = os.path.expandvars(config['datanode_log_path'])
 	
 	os.mkdir(datanode)   	#creating datanode
 	os.mkdir(namenode)	    #creating namenode
 	os.makedirs(DFS)        #root
+	os.mkdir(datanode_logs)
 	
+	#name node log file
 	name_node_logfile_path = os.path.expandvars(config['namenode_log_path'])
 	namenode_log_file = open(name_node_logfile_path,'a+')
-	namenode_log_file.write(str(datetime.datetime.now()) + ": created namenode log file\n")
+	namenode_log_file.write(str(datetime.datetime.now()) + " : created namenode log file\n")
+
+
+
+
+	#datanode log file 
+	
+	
 
 	mapping_file = open(namenode + 'mapping_file.json','w')
 	namenode_log_file.write(str(datetime.datetime.now()) + ": created namenode mapping file\n")
@@ -43,7 +52,14 @@ def init_DFS(config_file_path = 'default_config.json'):
 		dirname = 'DN' + str(i+1)
 		path = os.path.join(cur_path, dirname)
 		os.mkdir(path)
+
 		namenode_log_file.write(str(datetime.datetime.now()) + ": created datanode " + dirname +"\n")
+		logpaths = os.path.join(datanode_logs,dirname)
+		logpaths = logpaths +".txt"
+		datanode_logfiles = open(logpaths,'a+')
+		datanode_logfiles.write(str(datetime.datetime.now()) + " : created datanode " + dirname + "\n")
+		datanode_logfiles.close()
+
 		datanode_data[dirname] = blocks
 
 	datanode_tracker.write(json.dumps(datanode_data, indent=4))
