@@ -15,6 +15,7 @@ namenode = os.path.expandvars(config['path_to_namenodes'])
 no_of_nodes = config['num_datanodes']
 datanode_size = config['datanode_size']
 sync_period = config['sync_period']
+num_datanodes = config['num_datanodes']
 
 
 
@@ -43,6 +44,11 @@ sync_period = config['sync_period']
 def namenode_heartbeat():
     location_file = open(namenode+'location_file.json','r')
     location_data = json.load(location_file)
+    #handle datanode failure
+    for dir_no in range(1,num_datanodes+1):
+        if not os.path.isdir(datanode+"DataNodes/DN"+str(dir_no)):
+            os.mkdir(datanode+"DataNodes/DN"+str(dir_no))
+
     for file in location_data.keys():
         all_blocks = location_data[file]
         for replicas in all_blocks:
@@ -58,7 +64,7 @@ def namenode_heartbeat():
                             t += 1
                     else:
                         shutil.copy(datanode+"DataNodes/"+replicas[i-1], datanode+"DataNodes/"+replicas[i])
-    #print("everything ok")
+    print("everything ok")
 
 while(True):
     time.sleep(sync_period)
