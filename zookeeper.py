@@ -2,6 +2,7 @@ import time
 import os
 import json
 from utilities import *
+import shutil
 #from termcolor import colored
 
 config_file = open('current_config.json','r')
@@ -13,6 +14,4 @@ sync = config['sync_period']
 while(True):
     time.sleep(sync)
     if(not os.path.isdir(namenode)):
-        os.mkdir(namenode)
-        os.rename(sec_namenode,namenode)
-        os.mkdir(sec_namenode)
+        shutil.copytree(sec_namenode,namenode)
