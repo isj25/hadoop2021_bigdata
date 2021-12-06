@@ -2,7 +2,8 @@ import datetime
 import os
 import json
 from utilities import *
-from mapreduce import *
+#from mapreduce import *
+import subprocess
 #from termcolor import colored
 
 config_file = open('current_config.json','r')
@@ -26,6 +27,7 @@ datanode_path = os.path.join(datanode, 'DataNodes')
 
 def put_command(source, destination):
 	user_file = source.split('/')[-1]
+	#par_dir = os.path.split(destinataion)[0]
 	dest_path = os.path.join(destination, user_file)
 
 	#mapping of virtual path and file name
@@ -36,6 +38,9 @@ def put_command(source, destination):
 		mapping_file.close()
 		namenode_log_file.write(str(datetime.datetime.now()) + "path error " + destination +" does not exist\n")
 		raise Exception(destination,"No such directory")
+
+	if user_file in mapping_data[destination]:
+		raise Exception("File already exists")
 
 	mapping_data[destination].append(user_file)
 	updateJSON(mapping_data ,mapping_file)
@@ -54,8 +59,19 @@ def put_command(source, destination):
 	for split in fileSplit(source,block_size):
 		replica = []
 		for _ in range(replication):
-			DN_str = 'DN' + str(next_datanode)
-			empty_blk_no = datanode_details[DN_str].index(0)
+			empty_blk_no = 0
+			cur_no = 0
+			
+			while cur_no < no_of_nodes:
+				DN_str = 'DN' + str(next_datanode)
+				try:
+					empty_blk_no = datanode_details[DN_str].index(0)
+					break
+				except Exception:
+					cur_no += 1
+					next_datanode = (next_datanode % no_of_nodes) + 1
+			if cur_no == no_of_nodes:
+				raise Exception("All Datanodes are full")
 			block = 'block' + str(empty_blk_no)
 			
 			datanode_details[DN_str][empty_blk_no] = 1
@@ -217,4 +233,11 @@ def rm_command(path):
 
 
 def mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer):
-	mr(fs_input,fs_output,config_path,abs_mapper,abs_reducer)
+	mapping_file = open(namenode + "mapping_file.json",'r')
+	mapping_data = json.load(mapping_file)
+	# if not fs_input in mapping_data or not fs_output in mapping_data:
+	# 	raise Exception("Input or Output directory doesn't exist")
+	p1 = subprocess.Popen('python3 main.py cat --arg1 {} | python3 {} | sort -k1,1 | python3 {} > t.txt'.format(fs_input,abs_mapper,abs_reducer,fs_output),stdin=subprocess.PIPE, shell=True)
+	op_path = os.getcwd() + "/t.txt"
+	p1.wait()
+	subprocess.Popen('python3 main.py put --arg1 {} --arg2 {}'.format(op_path, fs_output), shell=True)
