@@ -1,7 +1,8 @@
 import os
 import json
 import sys
-from utilities import updateJSON 
+from utilities import updateJSON
+import heartbeat
 
 if (len(sys.argv) > 1):
     setup_config_path = sys.argv[1]
@@ -14,3 +15,12 @@ if (len(sys.argv) > 1):
         config.close()
     except Exception:
         print("No such file exists, create a new config file")
+
+config = open('current_config.json','r')
+config_data = json.load(config)
+datanode = os.path.expandvars(config['path_to_datanodes'])
+namenode = os.path.expandvars(config['path_to_namenodes'])
+if os.path.isdir(datanode) and os.path.isdir(namenode):
+    print("Successfully loaded DFS")
+else:
+    print("Failed to load DFS")
