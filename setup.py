@@ -1,23 +1,22 @@
 import os
+import sys
 import json
 import datetime
 from utilities import updateJSON 
 
-def init_DFS(config_file_path = 'default_config.json'):
+def init_DFS(config_file_path):
 	config_file = open(config_file_path)
 	config = json.load(config_file)
 
 	datanode = os.path.expandvars(config['path_to_datanodes'])
 	namenode = os.path.expandvars(config['path_to_namenodes'])
-	#DFS = os.path.expandvars(config['fs_path']) # FS PATH
 	datanode_logs = os.path.expandvars(config['datanode_log_path'])
-
 	
 	if os.path.isdir(datanode):
 		raise Exception("hdfs already exists")
+
 	os.mkdir(datanode)   	#creating datanode
 	os.mkdir(namenode)	    #creating namenode
-	#os.makedirs(DFS)        #root
 	os.mkdir(datanode_logs)
 	
 	#name node log file
@@ -75,14 +74,17 @@ def init_DFS(config_file_path = 'default_config.json'):
 	dfs_setup = open("dfs_setup_config_" + str(hdfs_data["no_of_dfs"])+".json",'w')
 	hdfs_main_path  = os.path.split(os.path.split(datanode)[0])[0]
 	config["secondary_namenode_path"] = hdfs_main_path + "/SECONDARYNAMENODE"
-	config["editlog_path"] = hdfs_main_path + "/EDITLOG"
 
 	os.mkdir(config["secondary_namenode_path"])
-	os.mkdir(config["editlog_path"])
 
 	dfs_setup.write(json.dumps(config,indent=4))
 	dfs_setup.close()
 	updateJSON(hdfs_data,hdfs_file)
 
 
-init_DFS('config_sample.json')
+if len(sys.argv) > 1:
+	config = sys.argv[1]
+else:
+	config = 'default_config.json'
+
+init_DFS(config)
