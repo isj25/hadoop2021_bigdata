@@ -2,6 +2,7 @@ import datetime
 import os
 import json
 from utilities import *
+from mapreduce import *
 #from termcolor import colored
 
 config_file = open('current_config.json','r')
@@ -216,4 +217,4 @@ def rm_command(path):
 
 
 def mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer):
-	print("hello")
+	mr(fs_input,fs_output,config_path,abs_mapper,abs_reducer)
