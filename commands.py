@@ -14,6 +14,8 @@ block_size = config['block_size']
 datanode = os.path.expandvars(config['path_to_datanodes'])
 namenode = os.path.expandvars(config['path_to_namenodes'])
 fs_path = os.path.expandvars(config['fs_path'])
+datanode_log_path = os.path.expandvars(config['datanode_log_path'])
+
 
 name_node_logfile_path = os.path.expandvars(config['namenode_log_path'])
 namenode_log_file = open(name_node_logfile_path,'a+')
@@ -60,6 +62,15 @@ def put_command(source, destination):
 
 			store_path = DN_str + '/' + block
 			replica.append(store_path)
+
+
+			logpath = os.path.join(datanode_log_path,DN_str)
+			logpath = logpath + ".txt"
+			datanode_log = open(logpath,'a+')
+			datanode_log.write(str(datetime.datetime.now()) + " : block allocated " + str(block) +" \n")
+			datanode_log.close()
+
+
 
 			file_path = os.path.join(datanode_path, store_path)
 			file = open(file_path,'w')
@@ -175,20 +186,29 @@ def rm_command(path):
 	for replica in location_data[path]:
 		for file_blk in replica:
 			DN_str, block = file_blk.split('/')
-			block = int(block[5:])									#getting the block number
+			blocknum = int(block[5:])									#getting the block number
 
-			datanode_details[DN_str][block] = 0
+			datanode_details[DN_str][blocknum] = 0
 
 			block_path = os.path.join(datanode, 'DataNodes', file_blk)
 			os.remove(block_path)
 
+			logpath = os.path.join(datanode_log_path,DN_str)
+			logpath = logpath + ".txt"
+			datanode_log = open(logpath,'a+')
+			datanode_log.write(str(datetime.datetime.now()) + " : block removed " + str(block) +" \n")
+			datanode_log.close()
+
 	del location_data[path]
-	namenode_log_file.write(str(datetime.datetime.now()) + " : file is removed " + file +"\n")
+	namenode_log_file.write(str(datetime.datetime.now()) + " : file is removed ->" + file +"\n")
 
 	mapping_file = open(namenode + "mapping_file.json",'r+')
 	mapping_data = json.load(mapping_file)
 	mapping_data[par_path].remove(file)
 
 	updateJSON(mapping_data, mapping_file)
+	namenode_log_file.write(str(datetime.datetime.now()) + " : mapping file updated "+str(os.path.getsize(namenode+"mapping_file.json")) +" bytes"+"\n")
 	updateJSON(location_data, location_file)
+	namenode_log_file.write(str(datetime.datetime.now()) + " : location file updated "+ str(os.path.getsize(namenode + "location_file.json"))+" bytes"+"\n")
 	updateJSON(datanode_details, datanode_tracker)
+	namenode_log_file.write(str(datetime.datetime.now()) + " : datanode_tracker file updated "+ str(os.path.getsize(namenode + "datanode_tracker.json"))+" bytes"+"\n")
