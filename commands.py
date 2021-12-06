@@ -4,7 +4,7 @@ import json
 from utilities import *
 #from termcolor import colored
 
-config_file = open('dfs_setup_config.json','r')
+config_file = open('current_config.json','r')
 config = json.load(config_file)
 
 no_of_nodes = config['num_datanodes']
