@@ -5,12 +5,12 @@
     "replication_factor": 3,
     "num_datanodes": 5,
     "datanode_size": 10,
-    "sync_period": 10,
+    "sync_period": 180,
     "datanode_log_path": "/home/$USER/DATANODE/DATANODE_LOGS/",
     "namenode_log_path": "/home/$USER/NAMENODE/NAMENODE_LOG.txt",
     "namenode_checkpoints": "/home/$USER/NAMENODE/CHECKPOINTS/",
     "fs_path": "/home/$USER/DFS/FILE_SYSTEM/",
     "dfs_setup_config": "/home/$USER/DFS/setup.json",
     "secondary_namenode_path": "/home/pes1ug19cs191/SECONDARYNAMENODE",
-    "editlog_path": "/home/satwik/EDITLOG"
+    "editlog_path": "/home/pes1ug19cs191/EDITLOG"
 }

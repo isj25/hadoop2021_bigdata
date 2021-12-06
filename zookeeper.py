@@ -9,7 +9,9 @@ config = json.load(config_file)
 
 namenode = os.path.expandvars(config['path_to_namenodes'])
 sec_namenode = os.path.expandvars(config['secondary_namenode_path'])
+sync = config['sync_period']
 while(True):
+    time.sleep(sync)
     if(not os.path.isdir(namenode)):
         os.mkdir(namenode)
         os.rename(sec_namenode,namenode)
