@@ -215,4 +215,5 @@ def rm_command(path):
 
 
 
-#def mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer):
+def mapreducejob(fs_input,fs_output,config_path,abs_mapper,abs_reducer):
+	print("hello")
