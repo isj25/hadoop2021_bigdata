@@ -29,6 +29,7 @@ def namenode_heartbeat():
     for dir_no in range(1,num_datanodes+1):
         if not os.path.isdir(datanode+"DataNodes/DN"+str(dir_no)):
             os.mkdir(datanode+"DataNodes/DN"+str(dir_no))
+            print("Datanode DN", str(dir_no), "created")
 
     for file in location_data.keys():
         all_blocks = location_data[file]
