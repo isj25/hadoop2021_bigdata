@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import datetime
+from shutil import copytree
 from utilities import updateJSON 
 
 def init_DFS(config_file_path):
@@ -75,7 +76,7 @@ def init_DFS(config_file_path):
 	hdfs_main_path  = os.path.split(os.path.split(datanode)[0])[0]
 	config["secondary_namenode_path"] = hdfs_main_path + "/SECONDARYNAMENODE"
 
-	os.mkdir(config["secondary_namenode_path"])
+	copytree(namenode, config["secondary_namenode_path"], dirs_exist_ok=True)
 
 	dfs_setup.write(json.dumps(config,indent=4))
 	dfs_setup.close()
