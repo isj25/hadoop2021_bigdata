@@ -37,7 +37,7 @@ if __name__ == '__main__':
 		rmdir_command(path)
 	elif command == 'mapreduce':
 		fs_input = args.input
-		fs_output = args.ouput
+		fs_output = args.output
 		config_path = args.config
 		abs_mapper = args.mapper
 		abs_reducer = args.reducer
