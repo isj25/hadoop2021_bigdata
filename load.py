@@ -10,15 +10,17 @@ if (len(sys.argv) > 1):
         cur_config = open('current_config.json','w')
         config_data = json.load(config)
         updateJSON(config_data,cur_config)
-        print(config_data)
+        print(json.dumps(config_data, indent=4))
         config.close()
     except Exception:
         print("No such file exists, create a new config file")
 
 config = open('current_config.json','r')
 config_data = json.load(config)
-datanode = os.path.expandvars(config['path_to_datanodes'])
-namenode = os.path.expandvars(config['path_to_namenodes'])
+
+datanode = os.path.expandvars(config_data['path_to_datanodes'])
+namenode = os.path.expandvars(config_data['path_to_namenodes'])
+
 if os.path.isdir(datanode) and os.path.isdir(namenode):
     print("Successfully loaded DFS")
 else:
