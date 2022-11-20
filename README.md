@@ -1,15 +1,13 @@
-# Big Data Project report
-
-### Team ID - BD_191_264_438_461
-
-
-
 ### YAH – Yet Another Hadoop
 
 ---
 
 This project is an attempt to simulate a miniature HDFS capable of performing some of the important tasks a distributed file system performs, running HDFS commands as well as scheduling Hadoop jobs.
 
+### Execution steps
+
+---
+https://humble-reason-194.notion.site/HDFS-Simulation-project-c866dee84b874d97a650f4131a490eda
 
 
 ### Design and implementation details
@@ -66,9 +64,4 @@ Datanode consists of all the file blocks created by the user.
 
 
 
-### Takeaway from the project
 
----
-
-1. Good understanding of Hadoop distributed file system and its architecture.
-2. Team work
